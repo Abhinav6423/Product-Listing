@@ -12,7 +12,7 @@ function CardGrid() {
         queryKey: ["products", page, limit],
         queryFn: () => getProducts(page, limit),
         keepPreviousData: true,
-        staleTime: 10000
+        staleTime: 60 * 1000
     })
 
     const products = data?.data || []
