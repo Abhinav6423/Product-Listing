@@ -1,15 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import Card from '../components/Card.jsx';
 import { getProducts } from '../Api-call/getProducts.js';
+import { useQuery } from '@tanstack/react-query';
 function CardGrid() {
-    const [products, setProducts] = useState([])
-    const [page, setPage] = useState(1)
-    const [limit, setLimit] = useState(4)
-    const [totalProducts, setTotalProducts] = useState(0)
-    const totalPages = Math.max(1, Math.ceil(totalProducts / limit));
-    const [loading, setLoading] = useState(true)
 
-    // const products = Array.from({ length: 8 }).map((_, i) => ({
+    const [page, setPage] = useState(1)
+    const limit = 4
+
+
+    const { data, isLoading, isError, error, isFetching } = useQuery({
+        queryKey: ["products", page, limit],
+        queryFn: () => getProducts(page, limit),
+        keepPreviousData: true,
+        staleTime: 10000
+    })
+
+    const products = data?.data || []
+    const totalProducts = data?.totalProducts || 0
+    const totalPages = Math.max(Math.ceil(totalProducts / limit), 1)
+
+
     //     id: i + 1,
     //     title: "Lakeview BNB Villa",
     //     location: "Bali, Indonesia",
@@ -21,30 +31,15 @@ function CardGrid() {
     //         "https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
     // }));
 
-    const fetchProducts = async () => {
-        try {
-            const result = await getProducts(page, limit)
 
-            if (result.success) {
-                console.log(result?.data?.data)
-                setProducts(result?.data?.data)
-                setTotalProducts(result?.data?.totalProducts)
-                console.log(result?.data?.totalProducts)
-            }
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setLoading(false)
-        }
+
+
+    if (isLoading || isFetching) {
+        return <h1>Loading...</h1>
     }
 
-    useEffect(() => {
-        fetchProducts()
-    }, [page, limit])
-
-
-    if (loading) {
-        return <h1>Loading...</h1>
+    if (isError) {
+        return <h1>Error : {error.message}</h1>
     }
 
 

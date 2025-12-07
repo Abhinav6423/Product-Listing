@@ -9,16 +9,12 @@ export const getProducts = async (page, limit) => {
         withCredentials: true
       }
     );
-
-    return {
-      success: true,
-      message: "Products fetched successfully",
-      data: res.data
-    };
+    console.log(res.data )
+    return res.data; // ✅ return pure data
   } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || error.message
-    };
+    // ✅ throw error so React Query can handle it
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch products"
+    );
   }
 };
